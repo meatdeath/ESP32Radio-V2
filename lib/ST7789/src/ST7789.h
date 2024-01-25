@@ -18,12 +18,18 @@
 #define COLOR_RED     ST77XX_RED    // xxxx x000 0000 0000
 #define COLOR_GREEN   ST77XX_GREEN  // 0000 0xxx xxx0 0000
 #define COLOR_BLUE    ST77XX_BLUE   // 0000 0000 000x xxxx
-#define COLOR_CYAN    (COLOR_GREEN | COLOR_BLUE )
-#define COLOR_MAGENTA (COLOR_RED   | COLOR_BLUE )
-#define COLOR_YELLOW  (COLOR_RED   | COLOR_GREEN)
+#define COLOR_CYAN    (COLOR_GREEN | COLOR_BLUE)
+#define COLOR_MAGENTA (COLOR_RED | COLOR_BLUE)
+#define COLOR_YELLOW  (COLOR_RED | COLOR_GREEN)
 #define COLOR_WHITE   (COLOR_RED | COLOR_BLUE | COLOR_GREEN)
 #define COLOR_GREY    ( ((ST77XX_RED>>1)&ST77XX_RED) | ((ST77XX_GREEN>>1)&ST77XX_GREEN) | (ST77XX_BLUE>>1) ) // 0x7BEF // 0111 1011 1110 1111
 // #define COLOR_GREY     0x7bf0 // 0111 1011 1111 0000
+
+// Color binary format: 0b RRRR RGGG GGGB BBBB
+// Red: [0..31]
+// Green: [0..63]
+// Blue: [0..31]
+#define COLOR_SET(R,G,B)  (((uint16_t)(R&0x1F)<<11) | ((uint16_t)(G&0x3F)<<5) | ((uint16_t)(B&0x1F)))
 
 #define DEFTXTSIZ  1                                  // Default text size
 
@@ -42,16 +48,39 @@ enum {
     TFTSECS // Data to display.  There are TFTSECS sections
 };
 
+// // Data to display.  There are TFTSECS sections
+// enum 
+// {
+//   TOP_SECTION = 0,
+//   MIDDLE_SECTION,
+//   BOTTOM_SECTION,
+//   OVERLAY_SECTION,
+//   TFTSECS
+// };
+
+// struct scrseg_struct                                  // For screen segments
+// {
+//   bool     updateReq;                                // Request update of screen
+//   uint16_t color;                                    // Textcolor
+//   uint16_t backColor;
+//   uint16_t x;
+//   uint16_t y;                                        // Begin of segment row
+//   uint16_t width;
+//   uint16_t height;                                   // Height of segment
+//   String   str;                                      // String to be displayed
+//   uint16_t value;
+// } ;
+
 struct scrseg_struct                                  // For screen segments
 {
-  bool     updateReq;                                // Request update of screen
-  uint16_t color;                                    // Textcolor
+  bool     updateReq ;                               // Request update of screen
+  uint16_t x ;                                        // Begin of segment row
+  uint16_t y ;                                        // Begin of segment row
+  uint16_t width ;                                   // Width of segment
+  uint16_t height ;                                   // Height of segment
+  String   str ;                                      // String to be displayed
+  uint16_t color ;                                    // Textcolor
   uint16_t backColor;
-  uint16_t x;
-  uint16_t y;                                        // Begin of segment row
-  uint16_t width;
-  uint16_t height;                                   // Height of segment
-  String   str;                                      // String to be displayed
   uint16_t value;
 } ;
 

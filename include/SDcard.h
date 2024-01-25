@@ -354,7 +354,7 @@ struct mp3spec_t                                      // For List of mp3 file on
     bool      talb ;                                          // Tag is TALB (album title)
     bool      tpe1 ;                                          // Tag is TPE1 (artist)
 
-    tftset ( DISP_SECTION_ARTIST_SONG, "Playing from local file" ) ;                 // Assume no ID3
+    tftset ( DISP_SECTION_STATION, "Playing from local file" ) ;                 // Assume no ID3
     p = (char*)path.c_str() + 1 ;                             // Point to filename (after the slash)
     showstreamtitle ( p, true ) ;                             // Show the filename as title (middle part)
     mp3file = SD.open ( path ) ;                              // Open the file
@@ -420,7 +420,7 @@ struct mp3spec_t                                      // For List of mp3 file on
         }
         if ( strncmp ( ID3tag.tagid, "TIT2", 4 ) == 0 )       // Songtitle?
         {
-          tftset ( DISP_SECTION_ARTIST_SONG, metalinebf + 1 ) ;                      // Yes, show title
+          tftset ( DISP_SECTION_STATION, metalinebf + 1 ) ;                      // Yes, show title
           icystreamtitle = String ( metalinebf + 1 ) ;        // For status in webinterface
         }
       }
@@ -440,7 +440,7 @@ struct mp3spec_t                                      // For List of mp3 file on
     String path ;                                           // Full file spec
 
     stop_mp3client() ;                                      // Disconnect if still connected
-    tftset ( DISP_SECTION_NAME, "MP3 Player" ) ;                            // Set screen segment top line
+    tftset ( TOP_SECTION, "MP3 Player" ) ;                            // Set screen segment top line
     displaytime ( "" ) ;                                    // Clear time on TFT screen
     setdatamode ( DATA ) ;                                  // Start in datamode 
     path = String ( getCurrentSDFileName() ) ;              // Set path to file to play

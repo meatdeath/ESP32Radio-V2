@@ -44,12 +44,12 @@
 // ESP32dev Signal  Wired to LCD        Wired to VS1053      AI Audio board    Wired to the rest
 // -------- ------  --------------      -------------------  ---------------   ------------------------
 // GPIO32           -                   pin 1 XDCS           I2C Clock
-// GPIO33           -                   -                    I2C Data
+// GPIO33           -                   pin 1 XDCS           I2C Data
 // GPIO5            -                   pin 2 XCS            KEY 6             -
 // GPIO4            -                   pin 4 DREQ           AMPLIFIER_ENABLE  -
-// GPIO2            pin 3 D/C or A0     -                    SPI_MISO          -
+// GPIO2            --pin 3 D/C or A0-- -                    SPI_MISO          -
 // GPIO16   RXD2    -                   -                                      TX of NEXTION (if in use)
-// GPIO17   TXD2    -                   -                                      RX of NEXTION (if in use)
+// GPIO17   TXD2    DC                  -                                      RX of NEXTION (if in use)
 // GPIO18   SCK     pin 5 CLK or SCK    pin 5 SCK            KEY 5             -
 // GPIO19   MISO    -                   pin 7 MISO           KEY 3             -
 // GPIO23   MOSI    pin 4 DIN or SDA    pin 6 MOSI           KEY 4             -
@@ -1276,7 +1276,6 @@ bool showstreamtitle ( const char *ml, bool full )
   {
     ESP_LOGI ( TAG, "Streamtitle found, %d bytes", strlen ( ml ) ) ;
     ESP_LOGI ( TAG, "%s", ml ) ;
-    //log_buf_n((uint8_t*)ml, strlen (ml)+1);
     p1 = (char*)ml + 12 ;                       // Begin of artist and title
     if ( ( p2 = strstr ( ml, "';" ) ) )          // Search for end of title
     {
@@ -1322,7 +1321,7 @@ bool showstreamtitle ( const char *ml, bool full )
   if ( strcmp ( oldstreamtitle,                 // Change in tiltlke?
                 streamtitle ) != 0 )
   {
-    tftset ( DISP_SECTION_ARTIST_SONG, streamtitle ) ;                 // Yes, set screen segment text middle part
+    tftset ( DISP_SECTION_ARTIST_SONG/*MIDDLE_SECTION*/, streamtitle ) ;                 // Yes, set screen segment text middle part
     return true ;                               // Return true if tiitle has changed
   }
   return false ;
@@ -1382,8 +1381,8 @@ bool connecttohost()
   hostwoext = presetinfo.host ;                      // Assume host does not have extension
   ESP_LOGI ( TAG, "Connect to host %s",
              presetinfo.host.c_str() ) ;
-  tftset ( DISP_SECTION_NAME, NAME ) ;                               // Set screen segment text top line
-  tftset ( DISP_SECTION_ARTIST_SONG, "" ) ;                                 // Clear song and artist
+  tftset ( DISP_SECTION_NAME/*TOP_SECTION*/, NAME ) ;                               // Set screen segment text top line
+  tftset ( DISP_SECTION_ARTIST_SONG/*MIDDLE_SECTION*/, "" ) ;                                 // Clear song and artist
   displaytime ( "" ) ;                               // Clear time on TFT screen
   setdatamode ( INIT ) ;                             // Start default in INIT mode
   chunked = false ;                                  // Assume not chunked
@@ -1608,8 +1607,17 @@ bool connectwifi()
                NAME, NAME ) ;
     WiFi.disconnect ( true ) ;                          // After restart the router could
     WiFi.softAPdisconnect ( true ) ;                    // still keep the old connection
-    IPAddress IP = WiFi.softAP ( NAME, NAME ) ;         // This ESP will be an AP
-    ipaddress = IP.toString() ;
+    bool wifiAPgood = WiFi.softAP ( NAME, NAME ) ;         // This ESP will be an AP
+    if (wifiAPgood)
+    {
+      ipaddress = WiFi.softAPIP().toString() ;
+    }
+    else
+    {
+       ESP_LOGE ( TAG, "Failed to create WiFi AP!" );
+       tftlog ( "Error! WiFi AP creation failure!" ) ;
+       while(1);
+    }
   }
   else
   {
@@ -1642,7 +1650,7 @@ void otastart()
   const char* p = "OTA update Started" ;
 
   ESP_LOGI ( TAG, "%s", p ) ;                      // Show event for debug
-  tftset ( DISP_SECTION_STATION, p ) ;                                // Set screen segment bottom part
+  tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, p ) ;                                // Set screen segment bottom part
   mp3client->abort() ;                             // Stop client
   timerAlarmDisable ( timer ) ;                    // Disable the timer
   disableCore0WDT() ;                              // Disable watchdog core 0
@@ -1659,7 +1667,7 @@ void otastart()
 void otaerror ( ota_error_t error)
 {
   ESP_LOGE ( TAG, "OTA error %d", error ) ;
-  tftset ( DISP_SECTION_STATION, "OTA error!" ) ;                        // Set screen segment bottom part
+  tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, "OTA error!" ) ;                        // Set screen segment bottom part
 }
 #endif                                                // ENABLEOTA
 
@@ -2559,7 +2567,7 @@ void setup()
              VERSION,
              heapspace ) ;                                // Normally about 100 kB
   ESP_LOGI ( TAG, "Display type is %s", DISPLAYTYPE ) ;   // Report display option
-
+  
   if ( !SPIFFS.begin ( FSIF ) )                           // Mount and test SPIFFS
   {
     ESP_LOGE ( TAG, "SPIFFS Mount Error!" ) ;             // A pity...
@@ -2649,11 +2657,8 @@ void setup()
     attachInterrupt ( ini_block.ir_pin,                  // Interrupts will be handle by isr_IR
                       isr_IR, CHANGE ) ;
   }
-  ESP_LOGI ( TAG, "Start %s display", DISPLAYTYPE ) ;
+  ESP_LOGI ( TAG, "Start %s display (cs=%d,dc=%d)", DISPLAYTYPE, INIPARS ) ;
   dsp_ok = dsp_begin ( INIPARS ) ;                       // Init display
-
-  //ESP_LOGI (TAG, "TFT pins: CS=%d DC=%d", ini_block.tft_cs_pin, ini_block.tft_dc_pin);
-
   if ( dsp_ok )                                          // Init okay?
   {
     dsp_erase() ;                                        // Clear screen
@@ -2667,7 +2672,7 @@ void setup()
     dsp_println ( "By Ed Smallenburg" ) ;
     dsp_update ( enc_menu_mode == VOLUME ) ;             // Show on physical screen if needed
   }
-
+  
   if ( ini_block.tft_bl_pin >= 0 )                       // Backlight for TFT control?
   {
     pinMode ( ini_block.tft_bl_pin, OUTPUT ) ;           // Yes, enable output
@@ -2684,7 +2689,7 @@ void setup()
     WiFi.disconnect() ;                                  // After restart router could still
     vTaskDelay ( 500 / portTICK_PERIOD_MS ) ;            //   keep old connection
     WiFi.mode ( WIFI_STA ) ;                             // This ESP is a station
-    // WiFi.setSleep (false ) ;                          // should prevent _poll(): pcb is NULL""error"
+    WiFi.setSleep (false ) ;                          // should prevent _poll(): pcb is NULL""error"
     vTaskDelay ( 500 / portTICK_PERIOD_MS ) ;            // ??
     WiFi.persistent ( false ) ;                          // Do not save SSID and password
     listNetworks() ;                                     // Find WiFi networks
@@ -2694,9 +2699,6 @@ void setup()
                              sizeof ( qdata_type ) ) ;
   dataqueue = xQueueCreate  ( QSIZ,                      // Create queue for data communication
                              sizeof ( qdata_struct ) ) ;
-
-  // ESP_LOGI (TAG, "VS1053 pins: CS=%d DCS=%d DREQ=%d", ini_block.vs_cs_pin, ini_block.vs_dcs_pin, ini_block.vs_dreq_pin);
-
   #if defined(DEC_VS1053) || defined(DEC_VS1003)
     VS1053_begin ( ini_block.vs_cs_pin,                  // Make instance of player and initialize
                    ini_block.vs_dcs_pin,
@@ -2704,6 +2706,12 @@ void setup()
                    ini_block.shutdown_pin,
                    ini_block.shutdownx_pin ) ;
   #endif
+  ESP_LOGI ( TAG, "VS1003: cs=%d dcs=%d dreq=%d shutdown=%d shutdownx=%d", ini_block.vs_cs_pin,                  // Make instance of player and initialize
+                   ini_block.vs_dcs_pin,
+                   ini_block.vs_dreq_pin,
+                   ini_block.shutdown_pin,
+                   ini_block.shutdownx_pin ) ;
+                             //while(1);
   p = "Connect to network" ;                             // Show progress
   ESP_LOGI ( TAG, "%s", p ) ;
   tftlog ( p, true ) ;                                   // On TFT too
@@ -2831,7 +2839,7 @@ if ( NetworkFound )
     vTaskDelay ( 2000 / portTICK_PERIOD_MS ) ;            // Yes, allow user to read display text
     dsp_erase() ;                                         // Clear screen
   }
-  tftset ( DISP_SECTION_NAME, NAME ) ;                                    // Set screen segment text top line
+  tftset ( DISP_SECTION_NAME/*TOP_SECTION*/, NAME ) ;                                    // Set screen segment text top line
   presetinfo.station_state = ST_PRESET ;                  // Start in preset mode
   nextPreset ( nvsgetstr ( "preset" ).toInt(), false  ) ; // Restore last preset
   xTaskCreatePinnedToCore (
@@ -3168,7 +3176,7 @@ void chk_enc()
       {
         enc_menu_mode = TRACK ;                               // Swich to TRACK mode
         ESP_LOGI ( TAG, "Encoder mode set to TRACK" ) ;
-        tftset ( DISP_SECTION_HINT, "Turn to select track\n"                  // Show current option
+        tftset ( DISP_SECTION_HINT/*OVERLAY_SECTION*/, "Turn to select track\n"                  // Show current option
                     "Press to confirm" ) ;
         getSDFileName ( +1 ) ;                                // Start with next file on SD
       }
@@ -3184,7 +3192,7 @@ void chk_enc()
     doubleclick = false ;
     enc_menu_mode = PRESET ;                                  // Swich to PRESET mode
     ESP_LOGI ( TAG, "Encoder mode set to PRESET" ) ;
-    tftset ( DISP_SECTION_HINT, "Turn to select station\n"                    // Show current option
+    tftset ( DISP_SECTION_HINT/*OVERLAY_SECTION*/, "Turn to select station\n"                    // Show current option
                 "Press to confirm" ) ;
     enc_preset = presetinfo.preset ;                          // Start with current preset
     updateNr ( &enc_preset, presetinfo.highest_preset,        // plus 1
@@ -3199,11 +3207,11 @@ void chk_enc()
       case VOLUME :
         if ( muteflag )
         {
-          tftset ( DISP_SECTION_STATION, icyname ) ;                             // Restore screen segment bottom part
+          tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, icyname ) ;                             // Restore screen segment bottom part
         }
         else
         {
-          tftset ( DISP_SECTION_HINT, "Mute" ) ;
+          tftset ( DISP_SECTION_HINT/*OVERLAY_SECTION*/, "Mute" ) ;
         }
         muteflag = !muteflag ;                                // Mute/unmute
         ESP_LOGI ( TAG, "Mute set to %d", muteflag ) ;
@@ -3212,13 +3220,13 @@ void chk_enc()
         nextPreset ( enc_preset ) ;                           // Make a definite choice
         enc_menu_mode = VOLUME ;                              // Back to default mode
         myQueueSend ( radioqueue, &startcmd ) ;               // Signal radiofuncs()
-        tftset ( DISP_SECTION_STATION, icyname ) ;                               // Restore screen segment bottom part
+        tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, icyname ) ;                               // Restore screen segment bottom part
         break ;
     #ifdef SDCARD
       case TRACK :
         myQueueSend ( sdqueue, &startcmd ) ;                  // Signal SDfuncs()
         enc_menu_mode = VOLUME ;                              // Back to default mode
-        tftset ( DISP_SECTION_STATION, icyname ) ;                               // Restore screen segment bottom part
+        tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, icyname ) ;                               // Restore screen segment bottom part
         break ;
     #endif
       default :
@@ -3290,7 +3298,7 @@ void chk_enc()
         tmp = tmp2 ;                                          // Yes, use it
       }
       chomp ( tmp ) ;                                         // Remove garbage from description
-      tftset ( DISP_SECTION_HINT, tmp ) ;                                     // Set screen segment bottom part
+      tftset ( DISP_SECTION_HINT/*OVERLAY_SECTION*/, tmp ) ;                                     // Set screen segment bottom part
       break ;
 #ifdef SDCARD
     case TRACK :
@@ -3299,7 +3307,7 @@ void chk_enc()
         getSDFileName ( SD_curindex + rotationcount ) ;      // Select next file on SD
         ESP_LOGI ( TAG, "Select track %s",                   // Show for debug
                     getCurrentSDFileName() ) ;
-        tftset ( DISP_SECTION_HINT, getCurrentShortSDFileName() ) ;          // Set screen segment bottom part
+        tftset ( DISP_SECTION_HINT/*OVERLAY_SECTION*/, getCurrentShortSDFileName() ) ;          // Set screen segment bottom part
       }
       break ;
 #endif
@@ -3346,7 +3354,7 @@ void spfuncs()
       }
       dsp_update ( enc_menu_mode == VOLUME ) ;                  // Be sure to paint physical screen
     }
-    if ( time_req )                                             // Time to refresh timetxt?
+        if ( time_req )                                             // Time to refresh timetxt?
     {
       if ( NetworkFound )                                       // Yes, time available?
       {
@@ -3367,7 +3375,7 @@ void spfuncs()
 
 void soundfunc()
 {
-    if ( muteflag )                                             // Mute or not?
+      if ( muteflag )                                             // Mute or not?
     {
       player_setVolume ( 0 ) ;                                  // Mute
     }
@@ -3399,7 +3407,7 @@ void mqttfunc()
       {
         mqttpub.publishtopic() ;                                // Check if any publishing to do
       }
-    }
+  }
 }
 
 
@@ -3732,7 +3740,7 @@ void handlebyte_ch ( uint8_t b )
           {
             icyname = presetinfo.hsym ;                 // Yes, use symbolic name
           }
-          tftset ( DISP_SECTION_STATION, icyname ) ;                       // Set screen segment bottom part
+          tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, icyname ) ;                       // Set screen segment bottom part
           mqttpub.trigger ( MQTT_ICYNAME ) ;            // Request publishing to MQTT
         }
         else if ( lcml.startsWith ( "transfer-encoding:" ) )
@@ -4340,34 +4348,35 @@ void displayinfo ( uint16_t inx )
   scrseg_struct* p = &tftdata[inx] ;
   uint16_t len ;                                           // Length of string, later buffer length
 
-  if ( inx == 0 )                                          // Topline is shorter
-  {
-    width += TIMEPOS ;                                     // Leave space for time
-  }
+  // if ( inx == 0 )                                          // Topline is shorter
+  // {
+  //   width += TIMEPOS ;                                     // Leave space for time
+  // }
   if ( dsp_ok )                                            // TFT active?
   {
-    dsp_fillRect ( 0, p->y, width, p->height, COLOR_BLACK ) ;    // Clear the space for new info
-    if ( ( dsp_getheight() > 64 ) && ( p->y > 1 ) )        // Need and space for divider?
-    {
-      dsp_fillRect ( 0, p->y - 4, width, 1, COLOR_GREEN ) ;      // Yes, show divider above text
-    }
+    dsp_fillRect ( p->x, p->y, p->width, p->height, p->backColor ) ;    // Clear the space for new info
+    // if ( ( dsp_getheight() > 64 ) && ( p->y > 1 ) )        // Need and space for divider?
+    // {
+    //   dsp_fillRect ( 0, p->y - 4, width, 1, GREEN ) ;      // Yes, show divider above text
+    // }
     len = p->str.length() ;                                // Required length of buffer
     if ( len++ )                                           // Check string length, set buffer length
     {
       char buf [ len ] ;                                   // Need some buffer space
       p->str.toCharArray ( buf, len ) ;                    // Make a local copy of the string
-      
-      //ESP_LOGI ( TAG, "----------------------- %d -----------------------", inx ) ;
-      //log_buf_n((uint8_t*)buf,len);
-      #ifndef ST7789
-        utf8ascii_ip ( buf ) ;                             // Convert possible UTF8
-      #else
-        utf8rus2ascii(buf);
-      #endif  
-      //log_buf_n((uint8_t*)buf,strlen(buf));
-      //ESP_LOGI ( TAG, "-------------------------------------------------" ) ;
+      utf8ascii_ip ( buf ) ;                               // Convert possible UTF8
       dsp_setTextColor ( p->color ) ;                      // Set the requested color
-      dsp_setCursor ( 0, p->y ) ;                          // Prepare to show the info
+      switch (inx)
+      {
+      case DISP_SECTION_NAME:
+          dsp_setCursor ( 8, p->y+12 ) ;                          // Prepare to show the info
+          break;
+      case DISP_SECTION_STATION:
+          dsp_setCursor ( 8, p->y+12 ) ;                          // Prepare to show the info
+          break;
+      default:
+          dsp_setCursor ( 8, p->y ) ;                          // Prepare to show the info
+      }
       dsp_println ( buf ) ;                                // Show the string
     }
   }

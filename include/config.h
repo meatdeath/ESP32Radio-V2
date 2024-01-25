@@ -11,9 +11,7 @@
 
 //#define ETHERNET                                        // For wired Ethernet (WT32-ETH-01 or similar)
 
-//#define FIXEDWIFI "urri_gde_knopka/tn772487"
-#define FIXEDWIFI "Redmi Note 5/Nirishka2@"
-//#define FIXEDWIFI "Irdeto/Irdeto1234$"                       // Add a fixed SSID to the list (WiFi only)
+#define FIXEDWIFI "USSR/Nirishka2@"                       // Add a fixed SSID to the list (WiFi only)
 
 //#define ENABLEOTA                                       // OTA feature
 
@@ -26,7 +24,7 @@
                                                           // Needs platform = espressif32@3.1.0 !!!!
 
 // Define (just one) type of display.  See documentation.
-//#define BLUETFT                                           // Works also for COLOR_RED TFT 128x160
+//#define BLUETFT                                           // Works also for RED TFT 128x160
 #define ST7789                                          // 240x240 TFT (SPI)
 //#define OLED1306                                        // 64x128 I2C OLED SSD1306
 //#define OLED1309                                        // 64x128 I2C OLED SSD1309

@@ -25,17 +25,24 @@
 Adafruit_ST7789*     ST7789_tft ;                          // For instance of display driver
 scrseg_struct        ST7789_tftdata[TFTSECS] = 
 {
-    { .updateReq=false, .color=COLOR_GREY,   .backColor=COLOR_BLACK, .x=  0, .y=  0, .width=320, .height=32, .str="", .value=0 },   // DISP_SECTION_TOP
-    { .updateReq=false, .color=COLOR_CYAN,   .backColor=COLOR_BLACK, .x=  0, .y= 30, .width=320, .height=32, .str="", .value=0 },   // DISP_SECTION_STATION
-    { .updateReq=false, .color=COLOR_YELLOW, .backColor=COLOR_BLACK, .x=100, .y=180, .width=220, .height=64, .str="", .value=0 },   // DISP_SECTION_ARTIST_SONG
-    { .updateReq=false, .color=COLOR_GREY,   .backColor=COLOR_BLACK, .x=  0, .y=180, .width=320, .height=64, .str="", .value=0 },   // DISP_SECTION_HINT
-    { .updateReq=false, .color=COLOR_WHITE,  .backColor=COLOR_BLACK, .x=  0, .y=  0, .width=200, .height=32, .str="", .value=0 },   // DISP_SECTION_NAME
+    { .updateReq=false, .x=  0, .y=  0, .width=320, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_TOP
+    { .updateReq=false, .x=  0, .y= 30, .width=320, .height=32, .str="", .color=COLOR_CYAN,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_STATION
+    { .updateReq=false, .x=100, .y=180, .width=220, .height=64, .str="", .color=COLOR_YELLOW, .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_ARTIST_SONG
+    { .updateReq=false, .x=  0, .y=180, .width=320, .height=64, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_HINT
+    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_NAME
 
-    { .updateReq=false, .color=COLOR_GREY,   .backColor=COLOR_BLACK, .x=288, .y=  0, .width= 32, .height=32, .str="", .value=0 },   // DISP_SECTION_WIFI,
-    { .updateReq=false, .color=COLOR_GREY,   .backColor=COLOR_BLACK, .x=  0, .y=  0, .width=200, .height=32, .str="", .value=0 },   // DISP_SECTION_BATTERY,
-    { .updateReq=false, .color=COLOR_GREY,   .backColor=COLOR_BLACK, .x=  0, .y=  0, .width=200, .height=32, .str="", .value=0 },   // DISP_SECTION_TIME,
-    { .updateReq=false, .color=COLOR_GREY,   .backColor=COLOR_BLACK, .x=  0, .y=  0, .width=200, .height=32, .str="", .value=0 },   // DISP_SECTION_FAVORITE_STATION,
+    { .updateReq=false, .x=288, .y=  0, .width= 32, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_WIFI,
+    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_BATTERY,
+    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_TIME,
+    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_FAVORITE_STATION,
 } ;
+// scrseg_struct        ST7789_tftdata[TFTSECS] =             // Screen divided in 3 segments + 1 overlay
+// {                                    // One text line is 8 pixels
+//   { .updateReq = false, .x = 0, .y = 0,   .width = 200, .height = 40,  .str = "", .color = COLOR_GREY,   .background = 0x1042 },   // 1 top line
+//   { .updateReq = false, .x = 0, .y = 40,  .width = 320, .height = 160, .str = "", .color = COLOR_CYAN,   .background = 0x0010 },   // 8 lines in the middle
+//   { .updateReq = false, .x = 0, .y = 200, .width = 320, .height = 40,  .str = "", .color = COLOR_YELLOW, .background = COLOR_GREY },   // 4 lines at the bottom
+//   { .updateReq = false, .x = 0, .y = 200, .width = 320, .height = 40,  .str = "", .color = COLOR_GREY,   .background = COLOR_GREY }    // 4 lines at the bottom for rotary encoder
+// } ;
 
 
 bool ST7789_dsp_begin ( int8_t cs, int8_t dc )
@@ -43,9 +50,9 @@ bool ST7789_dsp_begin ( int8_t cs, int8_t dc )
 // #ifdef GFX_EXTRA_PRE_INIT
 //   GFX_EXTRA_PRE_INIT();
 // #endif
-    if ( ( ST7789_tft = new Adafruit_ST7789 ( cs, dc , -1 ) ) )      // Create an instant for TFT
-    {
-        dsp_init() ;
+  if ( ( ST7789_tft = new Adafruit_ST7789 ( cs, dc , -1 ) ) )      // Create an instant for TFT
+  {
+    dsp_init() ;
         ST7789_tft->setFont(&TahomaRus);
         ST7789_tft->cp437(true);
 
@@ -64,8 +71,8 @@ bool ST7789_dsp_begin ( int8_t cs, int8_t dc )
         // utf8rus2ascii(buf2);
         // dsp_println(buf2);
         // while(1);
-    }
-    return ( ST7789_tft != NULL ) ;
+  }
+  return ( ST7789_tft != NULL ) ;
 }
 
 
@@ -146,6 +153,7 @@ void ST7789_displaytime ( const char* str, uint16_t color )
 
   if ( str[0] == '\0' )                            // Empty string?
   {
+    dsp_fillRect ( 200, 0, 120, 40, tftdata[DISP_SECTION_TOP].backColor ) ;   // Clear the space for new character
     for ( i = 0 ; i < 8 ; i++ )                    // Set oldstr to dots
     {
       oldstr[i] = '.' ;
@@ -159,8 +167,8 @@ void ST7789_displaytime ( const char* str, uint16_t color )
     {
       if ( str[i] != oldstr[i] )                   // Difference?
       {
-        dsp_fillRect ( pos, 0, 12, 24, COLOR_BLACK ) ;   // Clear the space for new character
-        dsp_setCursor ( pos, 0 ) ;                 // Prepare to show the info
+        dsp_fillRect ( pos, 12, 12, 16, tftdata[DISP_SECTION_TOP].backColor ) ;   // Clear the space for new character
+        dsp_setCursor ( pos, 12 ) ;                 // Prepare to show the info
         dsp_print ( str[i] ) ;                     // Show the character
         oldstr[i] = str[i] ;                       // Remember for next compare
       }

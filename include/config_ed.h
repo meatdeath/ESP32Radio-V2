@@ -12,7 +12,7 @@
 //#define DEC_HELIX                                       // Software decoder for MP3, AAC. I2S output
 
 // Define (just one) type of display.  See documentation.
-#define BLUETFT                                           // Works also for COLOR_RED TFT 128x160
+#define BLUETFT                                           // Works also for RED TFT 128x160
 //define ST7789                                           // 240x240 TFT
 //#define OLED1306                                        // 64x128 I2C OLED SSD1306
 //#define OLED1309                                        // 64x128 I2C OLED SSD1309
