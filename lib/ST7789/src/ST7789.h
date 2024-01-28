@@ -7,6 +7,7 @@
 #ifndef ST7789_H
 #define ST7789_H
 #include <Adafruit_ST7789.h>
+#include "disc5_128.h"
 
 #define TIMEPOS     -104                         // Position (column) of time in topline relative to end
 #define INIPARS     ini_block.tft_cs_pin, ini_block.tft_dc_pin  // Prameters for dsp_begin
@@ -108,6 +109,7 @@ extern Adafruit_ST7789*     ST7789_tft ;                                 // For 
 #define dsp_update(a)                                                    // Updates to the physical screen
 #define dsp_begin               ST7789_dsp_begin                         // Init driver
 #define dsp_init()              ST7789_tft->init ( 240, 320 ) ;
+#define ST7789_displayDiscIcon(x,y)  ST7789_tft->drawRGBBitmap(x+8,y+8,disc5_128.data,disc5_128.width,disc5_128.height)
 
 extern scrseg_struct     ST7789_tftdata[TFTSECS] ;                   // Screen divided in segments
 //void ST7789_dsp_fillRect   ( int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color ) ;
@@ -119,6 +121,5 @@ bool ST7789_dsp_begin      ( int8_t cs, int8_t dc ) ;
 void utf8rus2ascii(char *source);
 
 void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str);
-void ST7789_displayDiscIcon(int x, int y);
 
 #endif

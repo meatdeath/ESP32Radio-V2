@@ -5,7 +5,6 @@
 // Includes for various ST7735 displays.  Size is 240 x 240.                                       *
 //**************************************************************************************************
 #include "ST7789.h"
-#include "disc5_128.h"
 
 // #include <U8g2lib.h>
 // #include <Arduino_GFX_Library.h>
@@ -36,7 +35,7 @@ scrseg_struct        ST7789_tftdata[TFTSECS] =
   /*DISP_SECTION_BATTERY*/      { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_BATTERY,
   /*DISP_SECTION_TIME*/         { .updateReq=false, .x=220, .y=  0, .width=100, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_GREY, .value=0 },   // DISP_SECTION_TIME,
   /*DISP_SECTION_FAVORITE*/     { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_FAVORITE,
-  /*DISP_SECTION_ICON*/         { .updateReq=true, .x=  0, .y= 64, .width=144, .height=144,.str="", .color=COLOR_GREY,   .backColor=COLOR_WHITE, .value=0 },
+  /*DISP_SECTION_ICON*/         { .updateReq=true, .x=  0, .y= 64, .width=144, .height=144,.str=" ", .color=COLOR_GREY,   .backColor=COLOR_WHITE, .value=0 },
 } ;
 // scrseg_struct        ST7789_tftdata[TFTSECS] =             // Screen divided in 3 segments + 1 overlay
 // {                                    // One text line is 8 pixels
@@ -282,9 +281,4 @@ void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str)
         }
     } while (str[end] != 0);
   }
-}
-
-void ST7789_displayDiscIcon(int x, int y)
-{
-  ST7789_tft->drawRGBBitmap( x,  y,  disc5_128.data,  disc5_128.width,  disc5_128.height);
 }

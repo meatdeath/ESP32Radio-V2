@@ -4379,7 +4379,7 @@ void displayinfo ( uint16_t inx )
           dsp_printInSection(p->x+8, p->y+8, p->width-16, p->height-16, buf);
           return;
       case DISP_SECTION_ICON:
-          //ST7789_displayDiscIcon(p->x, p->y);
+          ST7789_displayDiscIcon(p->x, p->y);
           return;
       default:
           dsp_setCursor ( p->x, p->y ) ;                          // Prepare to show the info
