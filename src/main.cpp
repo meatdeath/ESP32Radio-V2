@@ -3740,7 +3740,11 @@ void handlebyte_ch ( uint8_t b )
           {
             icyname = presetinfo.hsym ;                 // Yes, use symbolic name
           }
-          tftset ( DISP_SECTION_STATION/*BOTTOM_SECTION*/, icyname ) ;                       // Set screen segment bottom part
+          String tmp = "[";
+          tmp += presetinfo.preset;
+          tmp += "] ";
+          icyname = tmp + icyname;
+          tftset ( DISP_SECTION_STATION, icyname ) ;                       // Set screen segment bottom part
           mqttpub.trigger ( MQTT_ICYNAME ) ;            // Request publishing to MQTT
         }
         else if ( lcml.startsWith ( "transfer-encoding:" ) )
