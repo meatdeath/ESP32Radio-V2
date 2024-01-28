@@ -26,6 +26,7 @@ Adafruit_ST7789*     ST7789_tft ;                          // For instance of di
 scrseg_struct        ST7789_tftdata[TFTSECS] = 
 {
   /*DISP_SECTION_TOP*/          { .updateReq=false, .x=  0, .y=  0, .width=320, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_GREY, .value=0 },   // DISP_SECTION_TOP
+  /*DISP_SECTION_BOTTOM*/       { .updateReq=true,  .x=  0, .y=208, .width=320, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_GREY, .value=0 },
   /*DISP_SECTION_STATION*/      { .updateReq=false, .x=  0, .y= 32, .width=320, .height=32, .str="", .color=COLOR_CYAN,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_STATION
   /*DISP_SECTION_ARTIST_SONG*/  { .updateReq=false, .x=144, .y= 64, .width=176, .height=144,.str="", .color=COLOR_DARK_GREY,  .backColor=COLOR_WHITE, .value=0 },   // DISP_SECTION_ARTIST_SONG
   /*DISP_SECTION_HINT*/         { .updateReq=false, .x=  0, .y=180, .width=320, .height=64, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_HINT
@@ -244,6 +245,7 @@ void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str)
     uint16_t space;
     int16_t x1,y1;
     uint16_t w1,h1;
+    uint16_t max_y = y+h-24;
     char copy;
     dsp_setTextColor(COLOR_LIGHT_GREY);
     do {
@@ -268,6 +270,11 @@ void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str)
       }
       copy = str[end];
       str[end] = 0;
+      if ( y > max_y ) {
+        str[end-1] = '.';
+        str[end-2] = '.';
+        str[end-3] = '.';
+      }
         // ST7789_tft->getTextBounds(&str[start],x,y,&x1,&y1,&w1,&h1);
         // Serial.printf("[%d %d - %d %d %d %d] %s\n", start, end, x1, y1, w1, h1, &str[start]);
         dsp_setCursor(x, y);
@@ -275,6 +282,7 @@ void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str)
       str[end] = copy;
       start = end+1;
       y+=24; // todo
+      if ( y > max_y ) break;
       if (copy == '\n') {
           dsp_setTextColor(COLOR_BLACK); 
           y += 8;
