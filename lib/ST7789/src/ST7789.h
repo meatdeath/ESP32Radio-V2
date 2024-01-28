@@ -22,7 +22,9 @@
 #define COLOR_MAGENTA (COLOR_RED | COLOR_BLUE)
 #define COLOR_YELLOW  (COLOR_RED | COLOR_GREEN)
 #define COLOR_WHITE   (COLOR_RED | COLOR_BLUE | COLOR_GREEN)
-#define COLOR_GREY    ( ((ST77XX_RED>>1)&ST77XX_RED) | ((ST77XX_GREEN>>1)&ST77XX_GREEN) | (ST77XX_BLUE>>1) ) // 0x7BEF // 0111 1011 1110 1111
+#define COLOR_LIGHT_GREY    ( ((ST77XX_RED>>1)&ST77XX_RED) | ((ST77XX_GREEN>>1)&ST77XX_GREEN) | (ST77XX_BLUE>>1) ) // 0x7BEF // 0111 1011 1110 1111
+#define COLOR_GREY          ( ((ST77XX_RED>>2)&ST77XX_RED) | ((ST77XX_GREEN>>2)&ST77XX_GREEN) | (ST77XX_BLUE>>2) )
+#define COLOR_DARK_GREY     ( ((ST77XX_RED>>3)&ST77XX_RED) | ((ST77XX_GREEN>>3)&ST77XX_GREEN) | (ST77XX_BLUE>>3) )
 // #define COLOR_GREY     0x7bf0 // 0111 1011 1111 0000
 
 // Color binary format: 0b RRRR RGGG GGGB BBBB
@@ -43,7 +45,8 @@ enum {
     DISP_SECTION_WIFI,
     DISP_SECTION_BATTERY,
     DISP_SECTION_TIME,
-    DISP_SECTION_FAVORITE_STATION,
+    DISP_SECTION_FAVORITE,
+    DISP_SECTION_ICON,
 
     TFTSECS // Data to display.  There are TFTSECS sections
 };
@@ -95,7 +98,7 @@ extern Adafruit_ST7789*     ST7789_tft ;                                 // For 
 #define dsp_setRotation()       ST7789_tft->setRotation ( 3 )            // Use landscape format (3 for upside down)
 #define dsp_print(a)            ST7789_tft->print ( a )                  // Print a string 
 #define dsp_println(b)          ST7789_tft->println ( b )                // Print a string followed by newline 
-#define dsp_fillRect(a,b,c,d,e) ST7789_tft->fillRect ( a, b, c, d, e ) ; // Fill a rectange
+#define dsp_fillRect(x,y,w,h,c) ST7789_tft->fillRect (x,y,w,h,c ) ; // Fill a rectange
 #define dsp_setTextSize(a)      ST7789_tft->setTextSize(a)               // Set the text size
 #define dsp_setTextColor(a)     ST7789_tft->setTextColor(a)              // Set the text color
 #define dsp_setCursor(a,b)      ST7789_tft->setCursor ( a, b )           // Position the cursor
@@ -114,5 +117,8 @@ void ST7789_displaytime    ( const char* str, uint16_t color = COLOR_BLUE ) ;
 bool ST7789_dsp_begin      ( int8_t cs, int8_t dc ) ;
 
 void utf8rus2ascii(char *source);
+
+void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str);
+void ST7789_displayDiscIcon(int x, int y);
 
 #endif

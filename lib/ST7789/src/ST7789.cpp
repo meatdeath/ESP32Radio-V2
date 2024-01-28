@@ -5,6 +5,7 @@
 // Includes for various ST7735 displays.  Size is 240 x 240.                                       *
 //**************************************************************************************************
 #include "ST7789.h"
+#include "disc5_128.h"
 
 // #include <U8g2lib.h>
 // #include <Arduino_GFX_Library.h>
@@ -25,16 +26,17 @@
 Adafruit_ST7789*     ST7789_tft ;                          // For instance of display driver
 scrseg_struct        ST7789_tftdata[TFTSECS] = 
 {
-    { .updateReq=false, .x=  0, .y=  0, .width=320, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_TOP
-    { .updateReq=false, .x=  0, .y= 30, .width=320, .height=32, .str="", .color=COLOR_CYAN,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_STATION
-    { .updateReq=false, .x=100, .y=180, .width=220, .height=64, .str="", .color=COLOR_YELLOW, .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_ARTIST_SONG
-    { .updateReq=false, .x=  0, .y=180, .width=320, .height=64, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_HINT
-    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_NAME
+  /*DISP_SECTION_TOP*/          { .updateReq=false, .x=  0, .y=  0, .width=320, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_GREY, .value=0 },   // DISP_SECTION_TOP
+  /*DISP_SECTION_STATION*/      { .updateReq=false, .x=  0, .y= 32, .width=320, .height=32, .str="", .color=COLOR_CYAN,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_STATION
+  /*DISP_SECTION_ARTIST_SONG*/  { .updateReq=false, .x=144, .y= 64, .width=176, .height=144,.str="", .color=COLOR_DARK_GREY,  .backColor=COLOR_WHITE, .value=0 },   // DISP_SECTION_ARTIST_SONG
+  /*DISP_SECTION_HINT*/         { .updateReq=false, .x=  0, .y=180, .width=320, .height=64, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_HINT
 
-    { .updateReq=false, .x=288, .y=  0, .width= 32, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_WIFI,
-    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_BATTERY,
-    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_TIME,
-    { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_FAVORITE_STATION,
+  /*DISP_SECTION_NAME*/         { .updateReq=false, .x=  0, .y=  0, .width=220, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_GREY, .value=0 },   // DISP_SECTION_NAME
+  /*DISP_SECTION_WIFI*/         { .updateReq=false, .x=  0, .y=  0, .width= 32, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_WIFI,
+  /*DISP_SECTION_BATTERY*/      { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_BATTERY,
+  /*DISP_SECTION_TIME*/         { .updateReq=false, .x=220, .y=  0, .width=100, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_GREY, .value=0 },   // DISP_SECTION_TIME,
+  /*DISP_SECTION_FAVORITE*/     { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_FAVORITE,
+  /*DISP_SECTION_ICON*/         { .updateReq=true, .x=  0, .y= 64, .width=144, .height=144,.str="", .color=COLOR_GREY,   .backColor=COLOR_WHITE, .value=0 },
 } ;
 // scrseg_struct        ST7789_tftdata[TFTSECS] =             // Screen divided in 3 segments + 1 overlay
 // {                                    // One text line is 8 pixels
@@ -53,6 +55,7 @@ bool ST7789_dsp_begin ( int8_t cs, int8_t dc )
   if ( ( ST7789_tft = new Adafruit_ST7789 ( cs, dc , -1 ) ) )      // Create an instant for TFT
   {
     dsp_init() ;
+    dsp_setTextColor(COLOR_LIGHT_GREY);
         ST7789_tft->setFont(&TahomaRus);
         ST7789_tft->cp437(true);
 
@@ -149,11 +152,17 @@ void ST7789_displaytime ( const char* str, uint16_t color )
 {
   static char oldstr[9] = "........" ;             // For compare
   uint8_t     i ;                                  // Index in strings
-  uint16_t    pos = dsp_getwidth() + TIMEPOS ;     // X-position of character, TIMEPOS is negative
+  uint16_t    pos_x = tftdata[DISP_SECTION_TIME].x ;     // X-position of character, TIMEPOS is negative
+  uint16_t    pos_y = tftdata[DISP_SECTION_TIME].y+8 ;
 
   if ( str[0] == '\0' )                            // Empty string?
   {
-    dsp_fillRect ( 200, 0, 120, 40, tftdata[DISP_SECTION_TOP].backColor ) ;   // Clear the space for new character
+    dsp_fillRect (  
+      tftdata[DISP_SECTION_TIME].x/*200*/, 
+      tftdata[DISP_SECTION_TIME].y/*0*/, 
+      tftdata[DISP_SECTION_TIME].width/*120*/, 
+      tftdata[DISP_SECTION_TIME].height/*40*/, 
+      tftdata[DISP_SECTION_TIME].backColor ) ;   // Clear the space for new character
     for ( i = 0 ; i < 8 ; i++ )                    // Set oldstr to dots
     {
       oldstr[i] = '.' ;
@@ -162,17 +171,23 @@ void ST7789_displaytime ( const char* str, uint16_t color )
   }
   if ( ST7789_tft )                                // TFT active?
   {
-    dsp_setTextColor ( color ) ;                   // Set the requested color
+    dsp_setTextColor ( tftdata[DISP_SECTION_TIME].color ) ;                   // Set the requested color
     for ( i = 0 ; i < 8 ; i++ )                    // Compare old and new
     {
       if ( str[i] != oldstr[i] )                   // Difference?
       {
-        dsp_fillRect ( pos, 12, 12, 16, tftdata[DISP_SECTION_TOP].backColor ) ;   // Clear the space for new character
-        dsp_setCursor ( pos, 12 ) ;                 // Prepare to show the info
+        dsp_fillRect ( pos_x, pos_y, 12, 18, tftdata[DISP_SECTION_TIME].backColor ) ;   // Clear the space for new character
+        if ((i%3) == 2)
+        {
+          dsp_setCursor ( pos_x+3, pos_y-3 ) ;                 // Prepare to show the info                     // Remember for next compare
+        } else {
+          dsp_setCursor ( pos_x, pos_y ) ;                 // Prepare to show the info
+        }
+        dsp_setTextColor( tftdata[DISP_SECTION_TIME].color );
         dsp_print ( str[i] ) ;                     // Show the character
         oldstr[i] = str[i] ;                       // Remember for next compare
       }
-      pos += 12 ;                                  // Next position
+      pos_x += 12 ;                                  // Next position
     }
   }
 }
@@ -217,4 +232,59 @@ void utf8rus2ascii(char *buf)
         buf[dst_i++] = ch;
     }
     buf[dst_i] = '\0';
+}
+
+
+
+void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str)
+{
+  int len = strlen(str);
+  if (len) {
+    uint16_t start = 0;
+    uint16_t end = 0;
+    uint16_t space;
+    int16_t x1,y1;
+    uint16_t w1,h1;
+    char copy;
+    dsp_setTextColor(COLOR_LIGHT_GREY);
+    do {
+      end = start;
+      space = 0;
+      while (1)
+      {
+        copy = str[end];
+        str[end] = 0;
+        ST7789_tft->getTextBounds(&str[start],x,y,&x1,&y1,&w1,&h1);
+        str[end] = copy;
+        if (w1 > w) // doesn't fit
+        {
+          if (space == 0) end--;
+          else { end = space; space = 0;}
+          break;
+        }
+        if (copy == ' ') {space = end;}
+        if (copy == 0 || copy == '\n')
+          break;
+        end++;
+      }
+      copy = str[end];
+      str[end] = 0;
+        // ST7789_tft->getTextBounds(&str[start],x,y,&x1,&y1,&w1,&h1);
+        // Serial.printf("[%d %d - %d %d %d %d] %s\n", start, end, x1, y1, w1, h1, &str[start]);
+        dsp_setCursor(x, y);
+        dsp_print(&str[start]);
+      str[end] = copy;
+      start = end+1;
+      y+=24; // todo
+      if (copy == '\n') {
+          dsp_setTextColor(COLOR_BLACK); 
+          y += 8;
+        }
+    } while (str[end] != 0);
+  }
+}
+
+void ST7789_displayDiscIcon(int x, int y)
+{
+  ST7789_tft->drawRGBBitmap( x,  y,  disc5_128.data,  disc5_128.width,  disc5_128.height);
 }

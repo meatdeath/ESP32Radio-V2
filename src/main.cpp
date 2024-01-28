@@ -3324,17 +3324,17 @@ void chk_enc()
 // Handles ADC meassurements.                                                                      *
 //**************************************************************************************************
 
-#ifdef ST7789
+//#ifdef ST7789
 // modified interface for ST7789 display
-void spfuncs()
-{
-    // check if it is the time to refresh info on display
-    if (spftrigger)
-    {
-        spftrigger = false; 
-    }
-}
-#else
+// void spfuncs()
+// {
+//     // check if it is the time to refresh info on display
+//     if (spftrigger)
+//     {
+//         spftrigger = false; 
+//     }
+// }
+// #else
 void spfuncs()
 {
   if ( spftrigger )                                             // Will be set every 100 msec
@@ -3371,7 +3371,7 @@ void spfuncs()
                adcvalraw ) / 16 ;
   }
 }
-#endif
+// #endif
 
 void soundfunc()
 {
@@ -4369,13 +4369,20 @@ void displayinfo ( uint16_t inx )
       switch (inx)
       {
       case DISP_SECTION_NAME:
-          dsp_setCursor ( 8, p->y+12 ) ;                          // Prepare to show the info
+          dsp_setCursor ( 8, p->y+8 ) ;                          // Prepare to show the info
           break;
       case DISP_SECTION_STATION:
-          dsp_setCursor ( 8, p->y+12 ) ;                          // Prepare to show the info
+          dsp_setCursor ( 8, p->y+8 ) ;                          // Prepare to show the info
           break;
+      case DISP_SECTION_ARTIST_SONG:
+          dsp_setCursor ( p->x+8, p->y+8 ) ;
+          dsp_printInSection(p->x+8, p->y+8, p->width-16, p->height-16, buf);
+          return;
+      case DISP_SECTION_ICON:
+          //ST7789_displayDiscIcon(p->x, p->y);
+          return;
       default:
-          dsp_setCursor ( 8, p->y ) ;                          // Prepare to show the info
+          dsp_setCursor ( p->x, p->y ) ;                          // Prepare to show the info
       }
       dsp_println ( buf ) ;                                // Show the string
     }
