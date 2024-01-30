@@ -17,8 +17,8 @@
 *  line scan direction: forward
 *  inverse: no
 *******************************************************************************/
-#ifndef DISC5_128
-#define DISC5_128
+// #ifndef DISC5_128
+// #define DISC5_128
 
  typedef struct {
      const uint16_t *data;
@@ -282,5 +282,5 @@ static const uint16_t image_data_disc5_128[15744] PROGMEM = {
 const tImage disc5_128 = { image_data_disc5_128, 128, 123,
     16 };
 
-#endif //DISC5_128
+// #endif //DISC5_128
 

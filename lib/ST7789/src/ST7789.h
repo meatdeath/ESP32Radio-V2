@@ -7,7 +7,6 @@
 #ifndef ST7789_H
 #define ST7789_H
 #include <Adafruit_ST7789.h>
-#include "disc5_128.h"
 
 #define TIMEPOS     -104                         // Position (column) of time in topline relative to end
 #define INIPARS     ini_block.tft_cs_pin, ini_block.tft_dc_pin  // Prameters for dsp_begin
@@ -89,6 +88,17 @@ struct scrseg_struct                                  // For screen segments
   uint16_t value;
 } ;
 
+
+
+enum {
+  NOT_FAVORITE = 0,
+  FAVORITE_1,
+  FAVORITE_2,
+  FAVORITE_3,
+  FAVORITE_4,
+  FAVORITE_5
+};
+
 #define tftdata             ST7789_tftdata
 #define displaybattery      ST7789_displaybattery
 #define displayvolume       ST7789_displayvolume
@@ -109,8 +119,7 @@ extern Adafruit_ST7789*     ST7789_tft ;                                 // For 
 #define dsp_getheight()         240                                      // Get height of screen
 #define dsp_update(a)                                                    // Updates to the physical screen
 #define dsp_begin               ST7789_dsp_begin                         // Init driver
-#define dsp_init()              ST7789_tft->init ( 240, 320 ) ;
-#define ST7789_displayDiscIcon(x,y)  ST7789_tft->drawRGBBitmap(x+8,y+8,disc5_128.data,disc5_128.width,disc5_128.height)
+#define dsp_init()              ST7789_tft->init ( 240, 320 ) 
 
 extern scrseg_struct     ST7789_tftdata[TFTSECS] ;                   // Screen divided in segments
 //void ST7789_dsp_fillRect   ( int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color ) ;
@@ -118,6 +127,8 @@ void ST7789_displaybattery ( uint16_t bat0, uint16_t bat100, uint16_t adcval ) ;
 void ST7789_displayvolume  ( uint8_t vol ) ;
 void ST7789_displaytime    ( const char* str, uint16_t color = COLOR_BLUE ) ;
 bool ST7789_dsp_begin      ( int8_t cs, int8_t dc ) ;
+void ST7789_displayDiscIcon(int16_t x, int16_t y);
+void ST7789_displayFavoriteIcon(int16_t x, int16_t y, uint8_t iconIndex);
 
 void utf8rus2ascii(char *source);
 

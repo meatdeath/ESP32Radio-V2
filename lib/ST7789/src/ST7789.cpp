@@ -22,6 +22,14 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include "../../../src/TahomaRus.h"
 
+#include "disc5_128.h"
+#include "not_favorite.h"
+#include "favorite_1.h"
+#include "favorite_2.h"
+#include "favorite_3.h"
+#include "favorite_4.h"
+#include "favorite_5.h"
+
 Adafruit_ST7789*     ST7789_tft ;                          // For instance of display driver
 scrseg_struct        ST7789_tftdata[TFTSECS] = 
 {
@@ -35,7 +43,7 @@ scrseg_struct        ST7789_tftdata[TFTSECS] =
   /*DISP_SECTION_WIFI*/         { .updateReq=false, .x=  0, .y=  0, .width= 32, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_WIFI,
   /*DISP_SECTION_BATTERY*/      { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_BATTERY,
   /*DISP_SECTION_TIME*/         { .updateReq=false, .x=220, .y=  0, .width=100, .height=32, .str="", .color=COLOR_WHITE,  .backColor=COLOR_GREY, .value=0 },   // DISP_SECTION_TIME,
-  /*DISP_SECTION_FAVORITE*/     { .updateReq=false, .x=  0, .y=  0, .width=200, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_FAVORITE,
+  /*DISP_SECTION_FAVORITE*/     { .updateReq=false, .x=284, .y= 32, .width=36, .height=32, .str="", .color=COLOR_GREY,   .backColor=COLOR_BLACK, .value=0 },   // DISP_SECTION_FAVORITE,
   /*DISP_SECTION_ICON*/         { .updateReq=true, .x=  0, .y= 64, .width=144, .height=144,.str=" ", .color=COLOR_GREY,   .backColor=COLOR_WHITE, .value=0 },
 } ;
 // scrseg_struct        ST7789_tftdata[TFTSECS] =             // Screen divided in 3 segments + 1 overlay
@@ -289,4 +297,18 @@ void dsp_printInSection(int16_t x, int16_t y, uint16_t w, uint16_t h, char *str)
         }
     } while (str[end] != 0);
   }
+}
+
+
+void ST7789_displayDiscIcon(int16_t x, int16_t y)
+{
+  ST7789_tft->drawRGBBitmap(x+8,y+8,disc5_128.data,disc5_128.width,disc5_128.height);
+}
+
+const tImage *favorite_icon[FAVORITE_5+1] = {&not_favorite,&favorite_1,&favorite_2,&favorite_3,&favorite_4,&favorite_5};
+
+void ST7789_displayFavoriteIcon(int16_t x, int16_t y, uint8_t iconIndex)
+{
+  if( iconIndex > FAVORITE_5)  iconIndex = NOT_FAVORITE;
+   ST7789_tft->drawRGBBitmap(x, y, favorite_icon[iconIndex]->data, favorite_icon[iconIndex]->width, favorite_icon[iconIndex]->height);
 }

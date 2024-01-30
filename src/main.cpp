@@ -828,6 +828,16 @@ void tftset ( uint16_t inx, String& str )
   }
 }
 
+void tftset ( uint16_t inx, uint16_t value )
+{
+  if ( inx < TFTSECS )                                  // Segment available on display
+  {
+    tftdata[inx].value = value ;                            // Set string
+    tftdata[inx].str = " ";
+    tftdata[inx].updateReq = true ;                    // and request flag
+  }
+}
+
 
 #ifndef ETHERNET
 //**************************************************************************************************
@@ -3744,6 +3754,7 @@ void handlebyte_ch ( uint8_t b )
           tmp += presetinfo.preset;
           tmp += "] ";
           icyname = tmp + icyname;
+          tftset( DISP_SECTION_FAVORITE, NOT_FAVORITE);
           tftset ( DISP_SECTION_STATION, icyname ) ;                       // Set screen segment bottom part
           mqttpub.trigger ( MQTT_ICYNAME ) ;            // Request publishing to MQTT
         }
@@ -4384,6 +4395,9 @@ void displayinfo ( uint16_t inx )
           return;
       case DISP_SECTION_ICON:
           ST7789_displayDiscIcon(p->x, p->y);
+          return;
+      case DISP_SECTION_FAVORITE:
+          ST7789_displayFavoriteIcon(p->x, p->y, p->value);
           return;
       default:
           dsp_setCursor ( p->x, p->y ) ;                          // Prepare to show the info
